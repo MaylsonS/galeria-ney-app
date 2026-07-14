@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cores extraídas do Figma */
+  --color-ink: #1c1b1b;        /* títulos e texto principal */
+  --color-body: #4a4a49;       /* texto secundário/parágrafos */
+  --color-terracotta: #a1795d; /* destaque do hero (CONHEÇA / PROJETOS) */
+  --color-ochre: #7b5800;      /* tags de autor, números de estatística */
+  --color-teal: #006874;       /* labels de categoria, segunda estatística */
+  --color-canvas: #ffffff;
+  --color-footer: #f4f4f4;
+
+  --font-display: "Space Grotesk", sans-serif;
+  --font-body: "Manrope", sans-serif;
+}
+
+body {
+  font-family: var(--font-body);
+  color: var(--color-body);
+  background-color: var(--color-canvas);
+  /* Os dois glows radiais sutis do Figma (canto superior-esquerdo e inferior-direito) */
+  background-image: radial-gradient(
+      141.42% 141.42% at 0% 0%,
+      rgba(123, 88, 0, 0.03) 0%,
+      rgba(123, 88, 0, 0) 50%
+    ),
+    radial-gradient(
+      141.42% 141.42% at 100% 100%,
+      rgba(0, 104, 116, 0.03) 0%,
+      rgba(0, 104, 116, 0) 50%
+    );
+  background-attachment: fixed;
+}
