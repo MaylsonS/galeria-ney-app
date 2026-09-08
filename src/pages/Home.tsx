@@ -5,17 +5,16 @@ import { GallerySection } from "../components/home/GallerySection";
 import { useObras } from "../hooks/useObras";
 
 export function Home() {
-  // Busca TODAS as obras uma única vez aqui. Tanto o contador de
-  // estatísticas (Hero) quanto a prévia da galeria (GallerySection)
-  // usam esse mesmo resultado — evita 2 chamadas idênticas à API.
-  const { obras, carregando } = useObras();
+  const { obras, carregando, erro } = useObras();
+
+  const listaObrasSegura = Array.isArray(obras) ? obras : [];
 
   return (
     <>
       <Navbar />
       <main>
-        <Hero totalObras={obras.length} carregando={carregando} />
-        <GallerySection obras={obras} carregando={carregando} />
+        <Hero totalObras={listaObrasSegura.length} carregando={carregando} erro={erro} />
+        <GallerySection obras={listaObrasSegura} carregando={carregando} erro={erro} />
       </main>
       <Footer />
     </>

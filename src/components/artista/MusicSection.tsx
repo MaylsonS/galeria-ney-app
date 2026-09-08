@@ -1,19 +1,19 @@
 import { Link } from "react-router-dom";
 import type { Obra } from "../../types/obra";
 
-interface FaixasDisponiveisProps {
-  faixas: Obra[];
+interface MusicSectionProps {
+  obras: Obra[];
 }
 
-export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
-  // Se a API retornar vazio, oculta a seção
-  if (!faixas || faixas.length === 0) return null;
+export function MusicSection({ obras }: MusicSectionProps) {
+  // Se não houver músicas cadastradas na API, não renderiza o bloco salmão inteiro
+  if (obras.length === 0) return null;
 
   return (
     <section className="bg-[#E28765] w-full py-20 mt-8">
-      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+      <div className="max-w-7xl mx-auto px-8">
         <div className="flex justify-between items-end mb-12">
-          <h2 className="text-3xl sm:text-4xl font-serif font-black uppercase text-white tracking-tighter shadow-sm">
+          <h2 className="text-4xl font-serif font-black uppercase text-white tracking-tighter shadow-sm">
             Faixas Disponíveis
           </h2>
           <Link
@@ -24,13 +24,14 @@ export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
           </Link>
         </div>
 
+        {/* Players do Spotify Renderizados Dinamicamente */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {faixas.slice(0, 4).map((faixa) => (
+          {obras.slice(0, 4).map((obra) => (
             <iframe
-              key={faixa.id}
-              src={faixa.urlEmbed}
-              title={faixa.titulo}
-              className="w-full h-[152px] rounded-xl shadow-lg bg-black/10"
+              key={obra.id}
+              src={obra.urlEmbed}
+              title={obra.titulo}
+              className="w-full h-[152px] rounded-xl shadow-lg"
               allow="encrypted-media; autoplay; fullscreen"
               loading="lazy"
             />

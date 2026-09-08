@@ -5,9 +5,11 @@ import capaPrincipal from "../../assets/capa-principal.jpg";
 interface HeroProps {
   totalObras: number;
   carregando: boolean;
+  erro?: unknown; // 1. Adicionado na tipagem
 }
 
-export function Hero({ totalObras, carregando }: HeroProps) {
+// 2. Adicionado o 'erro' aqui dentro dos parâmetros
+export function Hero({ totalObras, carregando, erro }: HeroProps) {
   return (
     <section className="mx-auto max-w-7xl px-6 pt-16 pb-20 lg:px-10 lg:pt-24">
       <div className="grid items-center gap-16 lg:grid-cols-[1.1fr_0.9fr]">
@@ -43,7 +45,8 @@ export function Hero({ totalObras, carregando }: HeroProps) {
           <div className="mt-12 flex gap-16">
             <div>
               <p className="font-display text-4xl font-bold text-ochre">
-                {carregando ? "—" : `${totalObras}+`}
+                {/* 3. Agora o React sabe quem é a variável 'erro' */}
+                {carregando || erro ? "—" : `${totalObras}+`}
               </p>
               <p className="mt-1 font-body text-sm font-black uppercase tracking-[1.4px] text-body">
                 Projetos

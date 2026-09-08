@@ -9,25 +9,9 @@ const LABEL_TIPO: Record<TipoObra, string> = {
 
 function MidiaObra({ obra }: { obra: Obra }) {
   if (obra.tipo === "IMAGEM") {
-    return (
-      <img
-        src={obra.urlEmbed}
-        alt={obra.titulo}
-        className="h-full w-full object-cover"
-      />
-    );
+    return <img src={obra.urlEmbed} alt={obra.titulo} className="h-full w-full object-cover" />;
   }
-
-  // Vídeo do YouTube ou faixa do Spotify: ambos usam o link de embed
-  // já convertido pelo back-end (Fase 2 do nosso roadmap).
-  return (
-    <iframe
-      src={obra.urlEmbed}
-      title={obra.titulo}
-      className="h-full w-full"
-      allow="encrypted-media; autoplay; fullscreen"
-    />
-  );
+  return <iframe src={obra.urlEmbed} title={obra.titulo} className="h-full w-full" allow="encrypted-media; autoplay; fullscreen" />;
 }
 
 function CardObra({ obra }: { obra: Obra }) {
@@ -52,16 +36,16 @@ function CardObra({ obra }: { obra: Obra }) {
 }
 
 interface GallerySectionProps {
-  obras: Obra[];
+  obras?: Obra[];
   carregando: boolean;
+  erro?: unknown;
 }
 
-export function GallerySection({ obras, carregando }: GallerySectionProps) {
+export function GallerySection({ obras = [], carregando, erro }: GallerySectionProps) {
+  const listaObras = Array.isArray(obras) ? obras : [];
+
   return (
-    <section
-      id="galeria"
-      className="mx-auto max-w-7xl border-t border-black/5 px-6 py-20 lg:px-10"
-    >
+    <section id="galeria" className="mx-auto max-w-7xl border-t border-black/5 px-6 py-20 lg:px-10">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="font-display text-3xl font-bold uppercase text-ink sm:text-4xl">
@@ -71,10 +55,7 @@ export function GallerySection({ obras, carregando }: GallerySectionProps) {
             Seleção dos trabalhos mais recentes.
           </p>
         </div>
-        <Link
-          to="/galeria"
-          className="font-display text-sm font-black uppercase tracking-[1px] text-ink hover:opacity-70"
-        >
+        <Link to="/artista/1" className="font-display text-sm font-black uppercase tracking-[1px] text-ink hover:opacity-70">
           Ver Galeria →
         </Link>
       </div>
@@ -87,14 +68,26 @@ export function GallerySection({ obras, carregando }: GallerySectionProps) {
           </>
         )}
 
-        {!carregando && obras.length === 0 && (
+        {!carregando && erro && (
+          <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 py-16 text-center">
+            <span className="text-4xl mb-4">🔌</span>
+            <h3 className="font-display text-lg font-black uppercase tracking-widest text-red-600">
+              Backend Desconectado
+            </h3>
+            <p className="mt-2 max-w-md font-body text-sm font-medium text-red-500">
+              Ligue sua API Spring Boot para carregar e exibir os projetos da galeria.
+            </p>
+          </div>
+        )}
+
+        {!carregando && !erro && listaObras.length === 0 && (
           <p className="col-span-full font-body text-body">
             Em breve as primeiras obras vão aparecer aqui.
           </p>
         )}
 
-        {!carregando &&
-          obras.slice(0, 2).map((obra) => <CardObra key={obra.id} obra={obra} />)}
+        {!carregando && !erro &&
+          listaObras.slice(0, 2).map((obra) => <CardObra key={obra.id} obra={obra} />)}
       </div>
     </section>
   );

@@ -1,68 +1,53 @@
-import type { VideoProjeto } from "../../types/artista";
+import { Link } from "react-router-dom";
+import type { Obra } from "../../types/obra";
 
-function CardVideo({ video }: { video: VideoProjeto }) {
-  return (
-    <div className="w-full flex-shrink-0 sm:w-[45%] lg:w-[32%]">
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-[#F3F3F3] shadow-lg">
-        <img
-          src={video.thumbnailUrl}
-          alt={video.titulo}
-          className="h-full w-full object-cover"
-        />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/10">
-          <div className="flex h-20 w-20 items-center justify-center rounded-xl border-2 border-white bg-black/40 backdrop-blur-md">
-            <div className="ml-1 h-0 w-0 border-y-[14px] border-l-[22px] border-y-transparent border-l-white" />
-          </div>
-        </div>
-        {video.duracao && (
-          <span className="absolute right-6 top-5 rounded bg-black/70 px-3 py-1 font-mono text-sm tracking-[1.4px] text-white backdrop-blur-sm">
-            {video.duracao}
-          </span>
-        )}
-      </div>
-
-      <div className="mt-4 flex items-start justify-between gap-4">
-        <div>
-          <h3 className="font-display text-2xl font-bold uppercase text-ink">
-            {video.titulo}
-          </h3>
-          <p className="mt-1 font-mono text-xs tracking-[1.4px] text-[#5F5E5E]">
-            {video.categoria}
-          </p>
-        </div>
-        <button
-          aria-label="Compartilhar vídeo"
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-[#434843] hover:bg-black/5"
-        >
-          ↗
-        </button>
-      </div>
-    </div>
-  );
+interface VideosSectionProps {
+  videos: Obra[];
 }
 
-export function VideosSection({ videos }: { videos: VideoProjeto[] }) {
-  if (videos.length === 0) return null;
+export function VideosSection({ videos }: VideosSectionProps) {
+  // PROTEÇÃO: Garante que é um array
+  const listaVideos = Array.isArray(videos) ? videos : [];
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h2 className="font-display text-4xl font-black uppercase text-ink">
+    <section className="max-w-7xl mx-auto px-6 lg:px-10 py-24">
+      <div className="flex justify-between items-end mb-12">
+        <h2 className="text-3xl sm:text-4xl font-serif font-black uppercase text-gray-800 tracking-tighter">
           Videos
         </h2>
-        <a
-          href="#"
-          className="flex items-center gap-2 font-display text-sm font-black uppercase tracking-[1px] text-ochre hover:opacity-70"
+        <Link
+          to="/galeria?tipo=VIDEO_YOUTUBE"
+          className="text-xs font-bold uppercase tracking-widest text-ink hover:opacity-70"
         >
-          🎬 Ver Galeria →
-        </a>
+          View Gallery →
+        </Link>
       </div>
 
-      <div className="mt-10 flex gap-8 overflow-x-auto pb-4">
-        {videos.map((video) => (
-          <CardVideo key={video.id} video={video} />
-        ))}
-      </div>
+      {/* CONDICIONAL: Renderiza o Empty State ou o Grid de vídeos */}
+      {listaVideos.length === 0 ? (
+        <div className="h-64 w-full rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
+          <p className="font-bold text-gray-400 uppercase tracking-widest text-sm">
+            Nenhum vídeo cadastrado
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {listaVideos.slice(0, 2).map((video) => (
+            <div
+              key={video.id}
+              className="aspect-video rounded-xl overflow-hidden bg-black relative shadow-md"
+            >
+              <iframe
+                src={video.urlEmbed}
+                title={video.titulo}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

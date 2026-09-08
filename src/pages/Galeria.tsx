@@ -14,11 +14,16 @@ export function Galeria() {
   const [searchParams] = useSearchParams();
   const tipoFiltro = searchParams.get("tipo") as TipoObra | null;
 
-  const { obras, carregando } = useObras();
+  // 1. Extraímos também o erro do hook
+  const { obras, carregando, erro } = useObras();
 
+  // 2. GARANTIA: Se obras não for um array (API offline), força a ser um array vazio []
+  const listaObras = Array.isArray(obras) ? obras : [];
+
+  // 3. O filtro roda em cima da variável segura 'listaObras'
   const obrasFiltradas = tipoFiltro
-    ? obras.filter((obra) => obra.tipo === tipoFiltro)
-    : obras;
+    ? listaObras.filter((obra) => obra.tipo === tipoFiltro)
+    : listaObras;
 
   return (
     <>
@@ -29,6 +34,7 @@ export function Galeria() {
         </h1>
 
         <div className="mt-10 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Skeleton de carregamento */}
           {carregando &&
             [1, 2, 3].map((n) => (
               <div
@@ -37,13 +43,28 @@ export function Galeria() {
               />
             ))}
 
-          {!carregando && obrasFiltradas.length === 0 && (
+          {/* FEEDBACK VISUAL: Backend Offline */}
+          {!carregando && erro && (
+            <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 py-16 text-center">
+              <span className="text-4xl mb-4">🔌</span>
+              <h3 className="font-display text-lg font-black uppercase tracking-widest text-red-600">
+                Backend Desconectado
+              </h3>
+              <p className="mt-2 max-w-md font-body text-sm font-medium text-red-500">
+                Ligue sua API Spring Boot para carregar e exibir os projetos da galeria.
+              </p>
+            </div>
+          )}
+
+          {/* Nenhum projeto encontrado (mas sem erro de API) */}
+          {!carregando && !erro && obrasFiltradas.length === 0 && (
             <p className="col-span-full font-body text-body">
               Nenhuma obra encontrada por aqui ainda.
             </p>
           )}
 
-          {!carregando &&
+          {/* Renderização segura das obras */}
+          {!carregando && !erro &&
             obrasFiltradas.map((obra) => (
               <div key={obra.id}>
                 <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#F5F5F5]">

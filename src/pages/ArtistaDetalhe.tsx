@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { useArtista } from "../hooks/useArtista";
@@ -6,10 +6,25 @@ import { ArtistaHero } from "../components/artista/ArtistaHero";
 import { PrintsCarousel } from "../components/artista/PrintsCarousel";
 import { FaixasDisponiveis } from "../components/artista/FaixasDisponiveis";
 import { VideosSection } from "../components/artista/VideosSection";
+import type { Artista } from "../types/artista";
 
 export function ArtistaDetalhe() {
   const { id } = useParams<{ id: string }>();
   const { artista, carregando, erro } = useArtista(id);
+
+  // MOCK: Se não tiver artista ou der erro (backend off), usamos esses dados para renderizar a tela
+  const artistaVisualizacao: Artista = artista?.nome ? artista : {
+    id: "1",
+    nome: "VTERRAJR",
+    nomeExibicao: "PROJETOS",
+    avatarUrl: "https://i.pravatar.cc/500?img=11",
+    tagline: "Exploration of urban neon aesthetics, cybernetic character design, and aggressive street-art textures.",
+    estatisticas: [
+      { valor: "42+", label: "Projetos", cor: "#A67B5B" },
+      { valor: "12k", label: "Seguidores", cor: "#14b8a6" }
+    ],
+    obras: [], faixas: [], videos: []
+  };
 
   return (
     <>
@@ -21,29 +36,25 @@ export function ArtistaDetalhe() {
         </div>
       )}
 
-      {!carregando && (erro || !artista) && (
-        <div className="mx-auto max-w-7xl px-6 py-20 text-center lg:px-10">
-          <p className="font-body text-body">
-            Não foi possível encontrar esse artista.
-          </p>
-          <Link
-            to="/"
-            className="mt-4 inline-block font-display text-sm font-black uppercase tracking-[1px] text-ink hover:opacity-70"
-          >
-            ← Voltar para o início
-          </Link>
-        </div>
-      )}
-
-      {!carregando && artista && (
+      {!carregando && (
         <main>
-          <ArtistaHero artista={artista} />
+          {/* Alerta visual avisando que está offline */}
+          {erro && (
+            <div className="bg-red-50 p-3 text-center text-red-600 font-bold text-sm">
+              🔌 API Offline: Exibindo layout de demonstração.
+            </div>
+          )}
+
+          <ArtistaHero artista={artistaVisualizacao} />
+
           <PrintsCarousel
-            artistaNome={artista.nome}
-            obras={artista.obras}
+            artistaNome={artistaVisualizacao.nome}
+            obras={artistaVisualizacao.obras}
           />
-          <FaixasDisponiveis faixas={artista.faixas} />
-          <VideosSection videos={artista.videos} />
+
+          <FaixasDisponiveis faixas={artistaVisualizacao.faixas} />
+
+          <VideosSection videos={artistaVisualizacao.videos} />
         </main>
       )}
 
