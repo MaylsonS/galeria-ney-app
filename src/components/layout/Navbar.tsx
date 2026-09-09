@@ -37,7 +37,7 @@ export function Navbar() {
 
         <Link
           to="/login"
-          className="rounded-full bg-[#232020] px-6 py-2 font-body text-sm font-bold text-[#E9E3E3] transition-opacity hover:opacity-90"
+          className="bg-[#1a1a1a] text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-stone-800 transition"
         >
           Login
         </Link>

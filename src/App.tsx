@@ -17,8 +17,8 @@ function App() {
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/artista/:id" element={<ArtistaDetalhe />} />
 
-      {/* Rota privada: só renderiza o <Dashboard /> se o PrivateRoute deixar passar */}
-      <Route element={<PrivateRoute apenasAdmin />}>
+      {/* Rota privada: Qualquer usuário logado (ADMIN ou USER) acessa o painel */}
+      <Route element={<PrivateRoute />}>
         <Route path="/admin" element={<Dashboard />} />
       </Route>
     </Routes>

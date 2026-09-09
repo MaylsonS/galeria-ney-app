@@ -13,10 +13,9 @@ export async function criarObra(dados: CriarObraDados): Promise<Obra> {
   return data;
 }
 
+
 export async function criarObraImagem(formData: FormData): Promise<Obra> {
-  const { data } = await api.post<Obra>("/obras/imagem", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  const { data } = await api.post<Obra>("/obras/imagem", formData);
   return data;
 }
 
