@@ -1,3 +1,4 @@
+// src/components/home/GallerySection.tsx
 import { Link } from "react-router-dom";
 import type { Obra } from "../../types/obra";
 
@@ -8,7 +9,6 @@ interface GallerySectionProps {
 }
 
 export function GallerySection({ obras, carregando, erro }: GallerySectionProps) {
-  // Helper para exibir o nome do artista limpo (caso venha apenas o email no login)
   const formatarNomeArtista = (login: string) => {
     if (!login) return "ARTISTA DESCONHECIDO";
     return login.split("@")[0].toUpperCase();
@@ -16,7 +16,6 @@ export function GallerySection({ obras, carregando, erro }: GallerySectionProps)
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
-      {/* Cabeçalho da Seção */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
         <div>
           <h2 className="text-4xl font-black uppercase tracking-tight text-black mb-2">
@@ -34,7 +33,6 @@ export function GallerySection({ obras, carregando, erro }: GallerySectionProps)
         </Link>
       </div>
 
-      {/* Tratamento de Estados */}
       {carregando && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[1, 2].map((n) => (
@@ -49,12 +47,15 @@ export function GallerySection({ obras, carregando, erro }: GallerySectionProps)
         </div>
       )}
 
-      {/* Grid de Obras (Limite de 2 para manter a estética do design original, se desejar) */}
       {!carregando && !erro && obras.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
           {obras.slice(0, 2).map((obra) => (
-            <article key={obra.id} className="flex flex-col gap-4 group cursor-pointer">
-              {/* Imagem */}
+            /* Transformamos o article inteiro em um Link roteável */
+            <Link
+              to={`/artista/${obra.autorId}`}
+              key={obra.id}
+              className="flex flex-col gap-4 group cursor-pointer"
+            >
               <div className="aspect-[4/5] overflow-hidden rounded-xl bg-black">
                 <img
                   src={obra.urlEmbed}
@@ -63,7 +64,6 @@ export function GallerySection({ obras, carregando, erro }: GallerySectionProps)
                 />
               </div>
 
-              {/* Metadados: Badge do Artista e Título */}
               <div className="flex flex-col items-start gap-2">
                 <span className="inline-flex items-center gap-2 rounded-md border border-[#D5E0D0] bg-[#ECF2E8] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#5C7351]">
                   <span className="h-1.5 w-1.5 rounded-full bg-[#5C7351]" aria-hidden="true"></span>
@@ -74,7 +74,7 @@ export function GallerySection({ obras, carregando, erro }: GallerySectionProps)
                   {obra.titulo}
                 </h3>
               </div>
-            </article>
+            </Link>
           ))}
         </div>
       )}

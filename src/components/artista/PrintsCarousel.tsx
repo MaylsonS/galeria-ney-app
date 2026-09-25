@@ -1,3 +1,4 @@
+// src/components/artista/PrintsCarousel.tsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import type { Obra } from "../../types/obra";
@@ -9,94 +10,86 @@ interface PrintsCarouselProps {
 
 export function PrintsCarousel({ artistaNome, obras }: PrintsCarouselProps) {
   const [indice, setIndice] = useState(0);
-
-  // PROTEÇÃO: Garante que é um array
   const listaObras = Array.isArray(obras) ? obras : [];
 
-  const anterior = () =>
-    setIndice((atual) => (atual - 1 + listaObras.length) % listaObras.length);
+  const anterior = () => setIndice((atual) => (atual - 1 + listaObras.length) % listaObras.length);
   const proximo = () => setIndice((atual) => (atual + 1) % listaObras.length);
 
-  // Só tenta pegar a obra atual se existir alguma na lista
-  const obraAtual = listaObras.length > 0 ? listaObras[indice] : null;
+  if (listaObras.length === 0) return null;
+
+  const obraAtual = listaObras[indice];
+  const obraAnterior = listaObras[(indice - 1 + listaObras.length) % listaObras.length];
+  const obraProxima = listaObras[(indice + 1) % listaObras.length];
 
   return (
-    <section className="border-t border-black/5 px-6 py-20 lg:px-10">
+    <section className="relative overflow-hidden bg-[#F5F5F5]/30 px-6 py-20 lg:px-10">
       <div className="mx-auto max-w-7xl">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        {/* Cabeçalho */}
+        <div className="mb-12 flex items-end justify-between">
           <div>
-            <h2 className="font-display text-3xl font-bold uppercase text-ink sm:text-4xl">
-              Todas as Prints
+            <h2 className="font-['Spicy_Rice'] text-[60px] font-normal uppercase leading-[60px] tracking-[2px] text-[#1C1B1B] opacity-70">
+              Todas As Prints
             </h2>
-            <p className="mt-2 font-body text-body">
-              Seleção de trabalhos recentes através de disciplinas.
+            <p className="mt-2 font-['Manrope'] text-[20px] leading-[28px] text-[#4A4A49]">
+              Selection of recent works across disciplines.
             </p>
           </div>
           <Link
             to="/galeria?tipo=IMAGEM"
-            className="font-display text-sm font-black uppercase tracking-[1px] text-ink hover:opacity-70"
+            className="flex items-center gap-3 font-['Manrope'] text-[20px] font-black uppercase leading-[28px] tracking-[2px] text-[#1C1B1B] hover:opacity-70"
           >
-            Ver Galeria →
+            View Gallery
+            <span className="flex h-5 w-5 items-center justify-center bg-[#1C1B1B] text-white">
+              →
+            </span>
           </Link>
         </div>
 
-        {/* CONDICIONAL: Renderiza o Empty State ou o Carrossel */}
-        {listaObras.length === 0 ? (
-          <div className="mt-12 h-96 w-full rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 flex items-center justify-center">
-            <p className="font-bold text-gray-400 uppercase tracking-widest text-sm">
-              Nenhuma obra cadastrada
-            </p>
-          </div>
-        ) : (
-          <div className="relative mt-12 flex items-center justify-center">
-            <button
-              onClick={anterior}
-              aria-label="Print anterior"
-              className="absolute left-0 z-10 hidden h-10 w-10 items-center justify-center text-2xl text-ink/60 hover:text-ink sm:flex"
-            >
-              ←
-            </button>
+        {/* Área do Carrossel (Flexbox para imitar o overlap do Figma) */}
+        <div className="relative flex h-[680px] w-full items-center justify-center">
 
-            <div className="w-full max-w-xl">
-              <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#F5F5F5]">
-                {obraAtual?.tipo === "IMAGEM" ? (
-                  <img
-                    src={obraAtual.urlEmbed}
-                    alt={obraAtual.titulo}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <iframe
-                    src={obraAtual?.urlEmbed}
-                    title={obraAtual?.titulo}
-                    className="h-full w-full"
-                    allow="encrypted-media; autoplay; fullscreen"
-                  />
-                )}
-              </div>
-
-              <div className="mt-4 flex flex-col items-center text-center">
-                <span className="inline-flex items-center gap-3 rounded-xl border border-[rgba(97,194,73,0.3)] bg-[rgba(146,190,86,0.2)] px-3 py-2">
-                  <span className="h-2 w-2 rounded-full bg-ochre" />
-                  <span className="font-body text-xs font-black uppercase tracking-[2.4px] text-ochre">
-                    {artistaNome}
-                  </span>
-                </span>
-                <h3 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
-                  {obraAtual?.titulo}
-                </h3>
-              </div>
+          {/* Obra Anterior (Cortada à Esquerda) */}
+          <div className="absolute -left-[320px] top-[40px] z-0 hidden w-[594px] md:block opacity-60">
+            <div className="h-[421px] rounded-[16px] bg-[#F5F5F5] p-6 shadow-sm">
+               <img src={obraAnterior?.urlEmbed} className="h-full w-full object-cover mix-blend-saturation" alt="Anterior" />
             </div>
-
-            <button
-              onClick={proximo}
-              aria-label="Próxima print"
-              className="absolute right-0 z-10 hidden h-10 w-10 items-center justify-center text-2xl text-ink/60 hover:text-ink sm:flex"
-            >
-              →
-            </button>
           </div>
-        )}
+
+          {/* Botão Anterior */}
+          <button onClick={anterior} className="absolute left-[20px] z-20 flex h-[80px] w-[80px] items-center justify-center rounded-[12px] border-2 border-white bg-black/40 text-white shadow-xl backdrop-blur-md transition hover:bg-black/60">
+            <svg width="22" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+
+          {/* Obra Central (Ativa) */}
+          <div className="z-10 flex w-full max-w-[659px] flex-col items-center">
+             <div className="h-[495px] w-full rounded-[28px] bg-white shadow-lg overflow-hidden">
+               <img src={obraAtual?.urlEmbed} alt={obraAtual?.titulo} className="h-full w-full object-cover" />
+             </div>
+
+             <div className="mt-8 flex flex-col items-center text-center">
+               <span className="inline-flex items-center gap-2 rounded-[12px] border border-[rgba(97,194,73,0.3)] bg-[rgba(146,190,86,0.2)] px-4 py-2 font-['Manrope'] text-[19px] font-black uppercase tracking-[2.4px] text-[#7B5800]">
+                 <span className="h-2 w-2 rounded-full bg-[#7B5800]"></span>
+                 {artistaNome}
+               </span>
+               <h3 className="mt-4 font-['Space_Grotesk'] text-[30px] font-bold leading-[36px] text-[#1C1B1B]">
+                 {obraAtual?.titulo}
+               </h3>
+             </div>
+          </div>
+
+          {/* Botão Próximo */}
+          <button onClick={proximo} className="absolute right-[20px] z-20 flex h-[80px] w-[80px] items-center justify-center rounded-[12px] border-2 border-white bg-black/40 text-white shadow-xl backdrop-blur-md transition hover:bg-black/60">
+             <svg width="22" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          {/* Obra Próxima (Cortada à Direita) */}
+          <div className="absolute -right-[320px] top-[40px] z-0 hidden w-[594px] md:block opacity-60">
+             <div className="h-[421px] rounded-[16px] bg-[#F5F5F5] p-6 shadow-sm">
+               <img src={obraProxima?.urlEmbed} className="h-full w-full object-cover mix-blend-saturation" alt="Próxima" />
+             </div>
+          </div>
+
+        </div>
       </div>
     </section>
   );
