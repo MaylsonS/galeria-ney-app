@@ -1,94 +1,87 @@
 import { Link } from "react-router-dom";
-import type { Obra, TipoObra } from "../../types/obra";
-
-const LABEL_TIPO: Record<TipoObra, string> = {
-  IMAGEM: "Imagem",
-  VIDEO_YOUTUBE: "Vídeo",
-  AUDIO_SPOTIFY: "Áudio",
-};
-
-function MidiaObra({ obra }: { obra: Obra }) {
-  if (obra.tipo === "IMAGEM") {
-    return <img src={obra.urlEmbed} alt={obra.titulo} className="h-full w-full object-cover" />;
-  }
-  return <iframe src={obra.urlEmbed} title={obra.titulo} className="h-full w-full" allow="encrypted-media; autoplay; fullscreen" />;
-}
-
-function CardObra({ obra }: { obra: Obra }) {
-  return (
-    <div>
-      <div className="aspect-[4/5] overflow-hidden rounded-2xl bg-[#F5F5F5]">
-        <MidiaObra obra={obra} />
-      </div>
-      <div className="mt-4">
-        <span className="inline-flex items-center gap-3 rounded-xl border border-[rgba(97,194,73,0.3)] bg-[rgba(186,231,123,0.2)] px-3 py-2">
-          <span className="h-2 w-2 rounded-full bg-ochre" />
-          <span className="font-display text-xs font-black uppercase tracking-[2.4px] text-ochre">
-            {LABEL_TIPO[obra.tipo] ?? obra.tipo}
-          </span>
-        </span>
-        <h3 className="mt-3 font-display text-2xl font-bold text-ink sm:text-3xl">
-          {obra.titulo}
-        </h3>
-      </div>
-    </div>
-  );
-}
+import type { Obra } from "../../types/obra";
 
 interface GallerySectionProps {
-  obras?: Obra[];
+  obras: Obra[];
   carregando: boolean;
-  erro?: unknown;
+  erro: string | null;
 }
 
-export function GallerySection({ obras = [], carregando, erro }: GallerySectionProps) {
-  const listaObras = Array.isArray(obras) ? obras : [];
+export function GallerySection({ obras, carregando, erro }: GallerySectionProps) {
+  // Helper para exibir o nome do artista limpo (caso venha apenas o email no login)
+  const formatarNomeArtista = (login: string) => {
+    if (!login) return "ARTISTA DESCONHECIDO";
+    return login.split("@")[0].toUpperCase();
+  };
 
   return (
-    <section id="galeria" className="mx-auto max-w-7xl border-t border-black/5 px-6 py-20 lg:px-10">
-      <div className="flex flex-wrap items-end justify-between gap-4">
+    <section className="mx-auto max-w-7xl px-6 py-20 lg:px-10">
+      {/* Cabeçalho da Seção */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-6">
         <div>
-          <h2 className="font-display text-3xl font-bold uppercase text-ink sm:text-4xl">
+          <h2 className="text-4xl font-black uppercase tracking-tight text-black mb-2">
             The Underground
           </h2>
-          <p className="mt-2 font-body text-body">
-            Seleção dos trabalhos mais recentes.
+          <p className="text-sm text-gray-500 font-medium">
+            Selection of recent works across disciplines.
           </p>
         </div>
-        <Link to="/artista/1" className="font-display text-sm font-black uppercase tracking-[1px] text-ink hover:opacity-70">
-          Ver Galeria →
+        <Link
+          to="/galeria"
+          className="text-xs font-bold uppercase tracking-widest text-black hover:text-[#5c6e61] transition-colors flex items-center gap-2"
+        >
+          View Gallery <span aria-hidden="true">&rarr;</span>
         </Link>
       </div>
 
-      <div className="mt-12 grid gap-10 sm:grid-cols-2">
-        {carregando && (
-          <>
-            <div className="aspect-[4/5] animate-pulse rounded-2xl bg-[#F5F5F5]" />
-            <div className="aspect-[4/5] animate-pulse rounded-2xl bg-[#F5F5F5]" />
-          </>
-        )}
+      {/* Tratamento de Estados */}
+      {carregando && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {[1, 2].map((n) => (
+            <div key={n} className="aspect-[4/5] animate-pulse rounded-2xl bg-gray-100" />
+          ))}
+        </div>
+      )}
 
-        {!carregando && erro && (
-          <div className="col-span-full flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-red-200 bg-red-50/50 py-16 text-center">
-            <span className="text-4xl mb-4">🔌</span>
-            <h3 className="font-display text-lg font-black uppercase tracking-widest text-red-600">
-              Backend Desconectado
-            </h3>
-            <p className="mt-2 max-w-md font-body text-sm font-medium text-red-500">
-              Ligue sua API Spring Boot para carregar e exibir os projetos da galeria.
-            </p>
-          </div>
-        )}
+      {!carregando && erro && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-8 text-center text-sm font-bold text-red-600">
+          Não foi possível carregar as obras no momento.
+        </div>
+      )}
 
-        {!carregando && !erro && listaObras.length === 0 && (
-          <p className="col-span-full font-body text-body">
-            Em breve as primeiras obras vão aparecer aqui.
-          </p>
-        )}
+      {/* Grid de Obras (Limite de 2 para manter a estética do design original, se desejar) */}
+      {!carregando && !erro && obras.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+          {obras.slice(0, 2).map((obra) => (
+            <article key={obra.id} className="flex flex-col gap-4 group cursor-pointer">
+              {/* Imagem */}
+              <div className="aspect-[4/5] overflow-hidden rounded-xl bg-black">
+                <img
+                  src={obra.urlEmbed}
+                  alt={obra.titulo}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 opacity-95 group-hover:opacity-100"
+                />
+              </div>
 
-        {!carregando && !erro &&
-          listaObras.slice(0, 2).map((obra) => <CardObra key={obra.id} obra={obra} />)}
-      </div>
+              {/* Metadados: Badge do Artista e Título */}
+              <div className="flex flex-col items-start gap-2">
+                <span className="inline-flex items-center gap-2 rounded-md border border-[#D5E0D0] bg-[#ECF2E8] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#5C7351]">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#5C7351]" aria-hidden="true"></span>
+                  {formatarNomeArtista(obra.autorLogin)}
+                </span>
+
+                <h3 className="text-xl font-bold text-black tracking-tight leading-tight">
+                  {obra.titulo}
+                </h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {!carregando && !erro && obras.length === 0 && (
+        <p className="text-gray-500 font-medium">Nenhum artista publicou imagens recentemente.</p>
+      )}
     </section>
   );
 }
