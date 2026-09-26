@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, DragEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { criarObraImagem } from "../services/obraService";
+import { criarObraImagem, criarObra } from "../services/obraService";
 
 // ============================================================================
 // 1. COMPONENTES VISUAIS BASE (Header, TabNav, Footer)
@@ -276,7 +276,7 @@ export function ObraForm({ titulo, descricao, anoProducao, isSubmitting, canSubm
 }
 
 // ============================================================================
-// 3. LÓGICA DE INTEGRAÇÃO COM O BACK-END (SEU CONTEXTO ORIGINAL)
+// 3. LÓGICA DE INTEGRAÇÃO COM O BACK-END
 // ============================================================================
 
 function ImagemTab() {
@@ -299,7 +299,6 @@ function ImagemTab() {
     setFeedback(null);
   }
 
-  // --- Função de Submit usando o seu serviço original ---
   async function handleSubmit() {
     if (!file || !titulo.trim()) return;
     setIsSubmitting(true);
@@ -309,22 +308,18 @@ function ImagemTab() {
       const formData = new FormData();
       formData.append("titulo", titulo);
       formData.append("descricao", descricao);
-      // Se a sua API antiga não recebia anoProducao, pode remover esta linha.
       if (anoProducao) formData.append("anoProducao", anoProducao);
       formData.append("arquivo", file);
 
-      // Chamada ao serviço que já estava a funcionar
       await criarObraImagem(formData);
 
       setFeedback({ tipo: "success", mensagem: "Obra publicada com sucesso!" });
 
-      // Limpar os campos após o sucesso
       setFile(null);
       setPreviewUrl(null);
       setTitulo("");
       setDescricao("");
     } catch (error: any) {
-      // Usa o formato de erro vindo do TratadorDeErros do Spring Boot
       const mensagemErro = error.response?.data?.[0]?.mensagem || "Erro inesperado ao salvar a obra.";
       setFeedback({ tipo: "error", mensagem: mensagemErro });
     } finally {
@@ -364,21 +359,18 @@ function LinkTab({ tipo }: { tipo: "AUDIO_SPOTIFY" | "VIDEO_YOUTUBE" }) {
     setFeedback(null);
 
     try {
-      const token = localStorage.getItem("token");
-      const payload = { titulo, descricao, urlMidia, tipo: tipo === "AUDIO_SPOTIFY" ? "AUDIO" : "VIDEO" };
-
-      const response = await fetch("http://localhost:8080/obras", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify(payload)
+      await criarObra({
+        titulo,
+        descricao,
+        urlMidia,
+        tipo // Envia exatamente "AUDIO_SPOTIFY" ou "VIDEO_YOUTUBE"
       });
-
-      if (!response.ok) throw new Error("Erro na submissão");
 
       setFeedback({ tipo: "success", mensagem: "Conteúdo publicado com sucesso!" });
       setTitulo(""); setUrlMidia(""); setDescricao("");
-    } catch (error) {
-      setFeedback({ tipo: "error", mensagem: "Ocorreu um erro ao registar a hiperligação." });
+    } catch (error: any) {
+      const mensagemErro = error.response?.data?.[0]?.mensagem || "Ocorreu um erro ao registar a hiperligação.";
+      setFeedback({ tipo: "error", mensagem: mensagemErro });
     } finally {
       setIsSubmitting(false);
     }
