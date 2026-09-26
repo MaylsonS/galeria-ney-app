@@ -1,0 +1,4 @@
+export const CARD = { background: "#fff", borderRadius: "8px", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", padding: 24, display: "flex", flexDirection: "column" as const, height: 603, position: "relative" as const };
+export const COL_HEADER = { fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.55px", textTransform: "uppercase" as const, color: "#000", textAlign: "center" as const, paddingBottom: 19, paddingTop: 7 };
+export const LABEL = { fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 700, letterSpacing: "0.55px", textTransform: "uppercase" as const, color: "#000", display: "block", marginBottom: 4 };
+export const INPUT = { width: "100%", height: 40, borderRadius: 8, border: "none", background: "#fff", boxShadow: "0 1px 2px rgba(0,0,0,0.05)", padding: "0 12px", fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#191C1D", outline: "none", boxSizing: "border-box" as const };

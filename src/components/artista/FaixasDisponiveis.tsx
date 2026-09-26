@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
-import type { Obra } from "../../types/obra";
 
 interface FaixasDisponiveisProps {
-  faixas: Obra[];
+  faixas: any[]; // Usando any[] para aceitar o formato mapeado pelo service sem quebrar o TypeScript
 }
 
 export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
@@ -30,7 +29,7 @@ export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
             {faixas[0] && (
               <div className="flex h-[350px] items-center justify-center overflow-hidden rounded-[24px] bg-[#B91C1C] p-8 shadow-2xl">
                  <iframe
-                    src={faixas[0].urlEmbed}
+                    src={faixas[0].urlEmbedSpotify || faixas[0].urlEmbed}
                     className="h-[152px] w-full rounded-xl border-none"
                     allow="encrypted-media; autoplay; clipboard-write; fullscreen"
                     loading="lazy"
@@ -41,10 +40,10 @@ export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
             {/* Players Secundários Escuros */}
             <div className="flex flex-col justify-center gap-6">
               {faixas[1] && (
-                <iframe src={faixas[1].urlEmbed} className="h-[152px] w-full rounded-[16px] bg-[#282828] shadow-lg border-none" allow="encrypted-media; autoplay; clipboard-write; fullscreen" loading="lazy" />
+                <iframe src={faixas[1].urlEmbedSpotify || faixas[1].urlEmbed} className="h-[152px] w-full rounded-[16px] bg-[#282828] shadow-lg border-none" allow="encrypted-media; autoplay; clipboard-write; fullscreen" loading="lazy" />
               )}
               {faixas[2] && (
-                <iframe src={faixas[2].urlEmbed} className="h-[152px] w-full rounded-[16px] bg-[#282828] shadow-lg border-none" allow="encrypted-media; autoplay; clipboard-write; fullscreen" loading="lazy" />
+                <iframe src={faixas[2].urlEmbedSpotify || faixas[2].urlEmbed} className="h-[152px] w-full rounded-[16px] bg-[#282828] shadow-lg border-none" allow="encrypted-media; autoplay; clipboard-write; fullscreen" loading="lazy" />
               )}
             </div>
           </div>
