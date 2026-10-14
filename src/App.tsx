@@ -4,6 +4,7 @@ import { Login } from "./pages/Login";
 import { Galeria } from "./pages/Galeria";
 import { Sobre } from "./pages/Sobre";
 import { ArtistaDetalhe } from "./pages/ArtistaDetalhe";
+import { ArtistaGaleria } from "./pages/ArtistaGaleria";
 import { Dashboard } from "./pages/Dashboard";
 import { PrivateRoute } from "./routes/PrivateRoute";
 
@@ -16,6 +17,8 @@ function App() {
       <Route path="/galeria" element={<Galeria />} />
       <Route path="/sobre" element={<Sobre />} />
       <Route path="/artista/:id" element={<ArtistaDetalhe />} />
+
+      <Route path="/artista/:id/galeria" element={<ArtistaGaleria />} />
 
       {/* Rota privada: Qualquer usuário logado (ADMIN ou USER) acessa o painel */}
       <Route element={<PrivateRoute />}>

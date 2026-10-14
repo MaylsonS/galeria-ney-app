@@ -1,10 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 interface FaixasDisponiveisProps {
   faixas: any[]; // Usando any[] para aceitar o formato mapeado pelo service sem quebrar o TypeScript
 }
 
 export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
+  const { id } = useParams<{ id: string }>();
   const temFaixas = faixas && faixas.length > 0;
 
   return (
@@ -16,7 +17,10 @@ export function FaixasDisponiveis({ faixas }: FaixasDisponiveisProps) {
           <h2 className="font-['Angkor'] text-[50px] md:text-[74px] font-normal uppercase leading-[1.1] tracking-[1px] text-[#D4E8D4] opacity-90 md:w-1/2">
             Faixas<br/>Disponíveis
           </h2>
-          <Link to="/galeria?tipo=AUDIO_SPOTIFY" className="mt-4 md:mt-0 flex items-center gap-3 font-['Manrope'] text-[20px] font-black uppercase leading-[28px] tracking-[2px] text-[#1C1B1B] hover:text-white transition-colors">
+          <Link
+            to={`/artista/${id}/galeria?tipo=AUDIO_SPOTIFY`}
+            className="mt-4 md:mt-0 flex items-center gap-3 font-['Manrope'] text-[20px] font-black uppercase leading-[28px] tracking-[2px] text-[#1C1B1B] hover:text-white transition-colors"
+          >
             View Gallery
             <span className="flex h-5 w-5 items-center justify-center bg-[#1C1B1B] text-white">→</span>
           </Link>
