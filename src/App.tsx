@@ -5,6 +5,7 @@ import { Galeria } from "./pages/Galeria";
 import { Sobre } from "./pages/Sobre";
 import { ArtistaDetalhe } from "./pages/ArtistaDetalhe";
 import { ArtistaGaleria } from "./pages/ArtistaGaleria";
+import { ObraDetalhe } from "./pages/ObraDetalhe"; // <-- 1. Importe a nova tela
 import { Dashboard } from "./pages/Dashboard";
 import { PrivateRoute } from "./routes/PrivateRoute";
 
@@ -19,6 +20,9 @@ function App() {
       <Route path="/artista/:id" element={<ArtistaDetalhe />} />
 
       <Route path="/artista/:id/galeria" element={<ArtistaGaleria />} />
+
+      {/* 2. Adicione a rota da Obra Detalhada */}
+            <Route path="/obra/:id" element={<ObraDetalhe />} />
 
       {/* Rota privada: Qualquer usuário logado (ADMIN ou USER) acessa o painel */}
       <Route element={<PrivateRoute />}>

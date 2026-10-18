@@ -1,50 +1,87 @@
-import { useState } from "react";
-import { useParams, useSearchParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import { Navbar } from "../components/layout/Navbar";
 import { Footer } from "../components/layout/Footer";
 import { useArtista } from "../hooks/useArtista";
+import api from "../services/api";
+import type { Obra } from "../types/obra";
 
 export function ArtistaGaleria() {
   const { id } = useParams<{ id: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Pega o tipo na URL (IMAGEM, AUDIO_SPOTIFY, VIDEO_YOUTUBE). Se não tiver, o padrão é IMAGEM.
   const tipo = searchParams.get("tipo") || "IMAGEM";
+
   const [busca, setBusca] = useState("");
+  const [buscaDebounce, setBuscaDebounce] = useState("");
+  const [obrasDaGaleria, setObrasDaGaleria] = useState<Obra[]>([]);
+  const [pagina, setPagina] = useState(0);
+  const [temMais, setTemMais] = useState(true);
+  const [buscando, setBuscando] = useState(false);
 
-  const { artista, carregando, erro } = useArtista(id);
+  const { artista, carregando: carregandoArtista } = useArtista(id);
 
-  if (carregando) {
+  // EFEITO 1: Debounce Seguro. Atualiza o termo E zera a página no mesmo exato momento
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setBuscaDebounce(busca);
+      setPagina(0); // Reseta a paginação ao digitar
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [busca]);
+
+  // EFEITO 2: Trocar de Aba (Imagem -> Vídeo) zera a página
+  useEffect(() => {
+    setPagina(0);
+  }, [tipo]);
+
+  // EFEITO 3: Buscar Obras Blindado contra Race Conditions
+  useEffect(() => {
+    let requisicaoAtiva = true; // Flag de proteção
+
+    async function fetchObras() {
+      setBuscando(true);
+
+      try {
+        const response = await api.get(`/obras/autor/${id}`, {
+          params: {
+            page: pagina,
+            size: 12,
+            tipo: tipo,
+            termo: buscaDebounce || undefined
+          }
+        });
+
+        // Se o usuário digitou outra coisa enquanto essa resposta não chegava, nós a descartamos!
+        if (!requisicaoAtiva) return;
+
+        const novasObras = response.data.content || [];
+
+        setObrasDaGaleria(prev => pagina === 0 ? novasObras : [...prev, ...novasObras]);
+        setTemMais(!response.data.last);
+
+      } catch (error) {
+        console.error("Erro ao buscar obras da galeria:", error);
+      } finally {
+        if (requisicaoAtiva) setBuscando(false);
+      }
+    }
+
+    if (id) fetchObras();
+
+    // Cleanup Function: Quando o efeito for rodar de novo, cancela a requisição atual
+    return () => {
+      requisicaoAtiva = false;
+    };
+  }, [id, tipo, buscaDebounce, pagina]);
+
+
+  if (carregandoArtista) {
     return (
-      <>
-        <Navbar />
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-16 w-16 animate-spin rounded-full border-4 border-gray-300 border-t-black" />
-        </div>
-        <Footer />
-      </>
+      <><Navbar /><div className="flex min-h-[60vh] items-center justify-center"><div className="h-16 w-16 animate-spin rounded-full border-4 border-gray-300 border-t-black" /></div><Footer /></>
     );
   }
-
-  if (erro || !artista) {
-    return (
-      <>
-        <Navbar />
-        <div className="flex min-h-[60vh] items-center justify-center text-red-600 font-bold">
-          Artista não encontrado.
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
-  // Filtra as obras pelo tipo e pelo texto digitado na barra de pesquisa
-  const obrasFiltradas = (artista.obras || []).filter((obra) => {
-    const matchTipo = obra.tipo === tipo;
-    const matchBusca = obra.titulo.toLowerCase().includes(busca.toLowerCase());
-    return matchTipo && matchBusca;
-  });
 
   const TITULOS: Record<string, string> = {
     IMAGEM: "Todas as Prints",
@@ -52,30 +89,22 @@ export function ArtistaGaleria() {
     VIDEO_YOUTUBE: "Todos os Vídeos"
   };
 
-  const tituloDaPagina = TITULOS[tipo] || "Galeria";
-
   return (
     <>
       <Navbar />
       <main className="mx-auto min-h-screen max-w-7xl px-6 py-12 lg:px-10">
 
-        {/* Cabeçalho, Botão Voltar e Busca */}
         <div className="relative mb-16 flex flex-col items-center justify-center text-center">
-
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(`/artista/${id}`)}
             className="absolute left-0 top-0 rounded-full bg-[#756A63] px-6 py-2 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#5a514b]"
           >
             ← Voltar
           </button>
 
           <h1 className="mt-16 font-['Angkor'] text-5xl uppercase tracking-wide text-[#5C5C5C] md:mt-0 md:text-6xl">
-            {tituloDaPagina}
+            {TITULOS[tipo] || "Galeria"}
           </h1>
-
-          <p className="mt-3 text-sm font-light text-gray-500">
-            Selection of recent works across disciplines.
-          </p>
 
           <div className="relative mt-8 w-full max-w-md">
             <input
@@ -91,55 +120,56 @@ export function ArtistaGaleria() {
           </div>
         </div>
 
-        {/* Feedback visual se a busca não retornar nada */}
-        {obrasFiltradas.length === 0 && (
+        {obrasDaGaleria.length === 0 && !buscando && (
           <div className="flex h-40 items-center justify-center text-gray-400 font-medium">
-            Nenhuma obra encontrada para "{busca}".
+            Nenhuma obra encontrada.
           </div>
         )}
 
-        {/*
-            RENDERIZAÇÃO INTELIGENTE DO LAYOUT
-            Se for imagem: usa layout Masonry (columns). Se for mídia (iframe), usa Grid para não cortar o player.
-        */}
         {tipo === "IMAGEM" ? (
           <div className="columns-1 gap-8 space-y-8 sm:columns-2 lg:columns-3">
-            {obrasFiltradas.map(obra => (
+            {obrasDaGaleria.map(obra => (
               <div key={obra.id} className="break-inside-avoid flex flex-col items-center">
-                <img
-                  src={obra.urlEmbed}
-                  alt={obra.titulo}
-                  className="w-full rounded-3xl object-cover shadow-lg transition-transform duration-300 hover:scale-[1.02]"
-                />
+                <Link to={`/obra/${obra.id}`} className="w-full">
+                  <img src={obra.urlEmbed} alt={obra.titulo} className="w-full rounded-3xl object-cover shadow-lg transition-transform duration-300 hover:scale-[1.02]" />
+                </Link>
                 <span className="mt-4 inline-block rounded-md bg-[#ECF2E8] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#5C7351]">
-                  • {artista.nome}
+                  • {artista?.nome}
                 </span>
-                <h3 className="mt-2 text-center font-serif text-xl font-bold text-gray-800">
-                  {obra.titulo}
-                </h3>
+                <Link to={`/obra/${obra.id}`}>
+                  <h3 className="mt-2 text-center font-serif text-xl font-bold text-gray-800 hover:text-[#A67B5B] transition-colors">{obra.titulo}</h3>
+                </Link>
               </div>
             ))}
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {obrasFiltradas.map(obra => (
+            {obrasDaGaleria.map(obra => (
               <div key={obra.id} className="flex flex-col items-center">
-                <div className="w-full h-[250px] overflow-hidden rounded-2xl shadow-lg bg-[#282828]">
-                  <iframe
-                    src={obra.urlEmbed}
-                    className="h-full w-full border-none"
-                    allow="encrypted-media; autoplay; clipboard-write; fullscreen"
-                    loading="lazy"
-                  />
+                <div className="relative w-full h-[250px] overflow-hidden rounded-2xl shadow-lg bg-[#282828] group">
+                  <iframe src={obra.urlEmbed} className="h-full w-full border-none" allow="encrypted-media" loading="lazy" />
+                  <Link to={`/obra/${obra.id}`} className="absolute inset-0 z-10 cursor-pointer bg-black/0 transition-colors group-hover:bg-white/10" />
                 </div>
                 <span className="mt-4 inline-block rounded-md bg-[#ECF2E8] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#5C7351]">
-                  • {artista.nome}
+                  • {artista?.nome}
                 </span>
-                <h3 className="mt-2 text-center font-serif text-xl font-bold text-gray-800">
-                  {obra.titulo}
-                </h3>
+                <Link to={`/obra/${obra.id}`}>
+                  <h3 className="mt-2 text-center font-serif text-xl font-bold text-gray-800 hover:text-[#A67B5B] transition-colors">{obra.titulo}</h3>
+                </Link>
               </div>
             ))}
+          </div>
+        )}
+
+        {temMais && obrasDaGaleria.length > 0 && (
+          <div className="mt-16 flex justify-center">
+            <button
+              onClick={() => setPagina(prev => prev + 1)}
+              disabled={buscando}
+              className="rounded-full border-2 border-black px-10 py-3 text-sm font-bold uppercase tracking-widest text-black transition-colors hover:bg-black hover:text-white disabled:opacity-50"
+            >
+              {buscando ? "Carregando..." : "Carregar Mais Obras"}
+            </button>
           </div>
         )}
 
